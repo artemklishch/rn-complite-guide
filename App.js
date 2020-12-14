@@ -8,29 +8,35 @@ import {
   ScrollView,
   FlatList,
 } from "react-native";
-import GoalItem from "./components";
-import GoalInput from "./components";
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState("");
   const [currentGoals, setCurrentGoals] = useState([]);
-  const enteredGoalHandler = (enteredText) => setEnteredGoal(enteredText);
-  const addCurrentGialHandler = () =>
+  const [isAddModal, setIsAddModal] = useState(false);
+  const addCurrentGoalHandler = (goalTitle) => {
     setCurrentGoals((goals) => [
       ...goals,
       // { key: Math.random().toString(), value: enteredGoal },
       // { id: Math.random().toString(), value: enteredGoal },
-      { guid: Math.random().toString(), value: enteredGoal },
+      { guid: Math.random().toString(), value: goalTitle },
     ]);
+  };
+  const onDeleteItem = (id) => {
+    setCurrentGoals((goals) => goals.filter((goal) => goal.guid !== id));
+  };
+  const onCancelAdditionGoal = () => {
+    setIsAddModal(false);
+  };
   return (
     <View style={styles.screen}>
-      <View style={styles.inputContainer}>
-        <GoalInput
-          enteredGoalHandler={enteredGoalHandler}
-          enteredGoal={enteredGoal}
-        />
-        <Button title="ADD" onPress={addCurrentGialHandler} />
-      </View>
+      <Button title="Add New Goal" onPress={() => setIsAddModal(true)} />
+      <GoalInput
+        visiblity={isAddModal}
+        onAddGoal={addCurrentGoalHandler}
+        onCancel={onCancelAdditionGoal}
+        setIsAddModal={setIsAddModal}
+      />
       {/* <ScrollView>
         {currentGoals.map((goal, index) => (
           <View key={index} style={styles.listItem}>
@@ -48,7 +54,13 @@ export default function App() {
       <FlatList
         keyExtractor={(item) => item.guid}
         data={currentGoals}
-        renderItem={(itemData) => <GoalItem title={itemData.item.value} />}
+        renderItem={(itemData) => (
+          <GoalItem
+            title={itemData.item.value}
+            onDelete={onDeleteItem}
+            id={itemData.item.guid}
+          />
+        )}
       />
     </View>
   );
@@ -56,9 +68,4 @@ export default function App() {
 
 const styles = StyleSheet.create({
   screen: { padding: 50 },
-  inputContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
 });
